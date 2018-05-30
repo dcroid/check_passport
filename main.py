@@ -8,12 +8,43 @@ import datetime
 import dateutil.relativedelta
 
 
+YEAR_CHANGE_14 = 14
+YEAR_CHANGE_20 = 20
+YEAR_CHANGE_45 = 45
+
+DATE_FORMAT = '%Y-%m-%d'
+
+
+def age_get_passport(born):
+    """
+    Determine the year of replacement of the passport
+
+    :param born:  birthday
+    :return: Int
+             Exception if birthday > today or old year < CHANGE_PASSPORT_14
+    """
+    age = calculate_age(born)
+
+    if age < YEAR_CHANGE_14:
+        raise Exception('Expected age is 14+')
+
+    if YEAR_CHANGE_14 <= age < YEAR_CHANGE_20:
+        return YEAR_CHANGE_14
+    elif YEAR_CHANGE_20 <= age < YEAR_CHANGE_45:
+        return YEAR_CHANGE_20
+    elif age >= YEAR_CHANGE_45:
+        return YEAR_CHANGE_45
+    else:
+        raise Exception('WOW! Craizy param! Bro, Check dob and calculate_age fun pls')
+
+
 def calculate_age(born):
     """
     Get Age from date
 
     :param born: datetime.date object
-    :return: int
+    :return: int if years > 0
+             false if years <= 0
 
     """
     today = datetime.date.today()
@@ -26,60 +57,41 @@ def calculate_age(born):
     if birthday > today:
         return today.year - born.year - 1
     else:
-        return today.year - born.year
+        years = today.year - born.year
+        if years <= 0:
+            return 0
+        return years
 
 
-def check_passport(dob=None, get_passport=None):
+def check_passport(born, get_passport):
     """Check overdue passport.
 
-    :param dob: date of birth (Format '%Y-%m-%d')
+    :param born: date of birth (Format '%Y-%m-%d')
     :param get_passport: date get passport (Format '%Y-%m-%d')
     :return: bool (True/False)
-
+            True - Valid passport
+            False - Invalid passport
     """
 
-    date_tmp = '%Y-%m-%d'
-
-    # Cheking parameters
-    if not dob or not get_passport:
-        if not dob:
-            raise Exception('No param "dob"')
-        else:
-            raise Exception('No param "get_passport"')
+    try:
+        birthday = datetime.datetime.strptime(born, DATE_FORMAT).date()
+    except ValueError as error:
+        raise ValueError(error)
 
     try:
-        date_dob = datetime.datetime.strptime(dob, date_tmp).date()
-    except ValueError:
-        raise Exception('Wrong format param "dob"')
+        passport = datetime.datetime.strptime(get_passport, DATE_FORMAT).date()
+    except ValueError as error:
+        raise ValueError(error)
 
-    try:
-        date_passport = datetime.datetime.strptime(get_passport, date_tmp).date()
-    except ValueError:
-        raise Exception('Wrong format param "get_passport"')
-
-    age = calculate_age(date_dob)
-    if age < 14:
-        raise Exception('Expected age is 14+')
-
-    if 14 <= age < 20:
-        years = 14
-    elif 20 <= age < 45:
-        years = 20
-    elif age >= 45:
-        years = 45
-    else:
-        raise Exception('WOW! Craizy param! Bro, Check dob and calculate_age fun pls')
-
-    max_exp_date = date_dob + dateutil.relativedelta.relativedelta(years=years, months=1)
-    delta = max_exp_date - date_passport
-
+    max_issued_date = birthday + dateutil.relativedelta.relativedelta(years=age_get_passport(birthday), months=1)
+    delta = max_issued_date - passport
     if delta.days not in range(0, 31):
         return False
 
     return True
 
-
 if __name__ == '__main__':
+
     print(
-        check_passport(dob='2018-01-01', get_passport='2002-07-22')
+        check_passport('2004-05-27', '2018-05-28')
     )
