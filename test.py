@@ -11,7 +11,8 @@ class TestStringMethods(unittest.TestCase):
 
         date = datetime.datetime.strptime('1988-05-27', DATE_FORMAT).date()
         date2 = datetime.datetime.strptime('2018-05-29', DATE_FORMAT).date()
-        date3 = datetime.datetime.strptime('2019-05-29', DATE_FORMAT).date()
+        date3 = datetime.datetime.strptime('2020-05-29', DATE_FORMAT).date()
+
         self.assertEqual(30, calculate_age(date))
         self.assertEqual(0, calculate_age(date2))
         self.assertEqual(0, calculate_age(date3))

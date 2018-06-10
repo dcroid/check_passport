@@ -44,7 +44,8 @@ def calculate_age(born):
 
     :param born: datetime.date object
     :return: int if years > 0
-             false if years <= 0
+             0 if years <= 0
+
 
     """
     today = datetime.date.today()
@@ -54,13 +55,12 @@ def calculate_age(born):
         # raised when birth date is February 29
         # and the current year is not a leap year.
         birthday = born.replace(year=today.year, month=born.month+1, day=1)
-    if birthday > today:
+
+    if birthday.year < today.year:
         return today.year - born.year - 1
     else:
         years = today.year - born.year
-        if years <= 0:
-            return 0
-        return years
+        return years if years > 0 else 0
 
 
 def check_passport(born, get_passport):
@@ -89,9 +89,3 @@ def check_passport(born, get_passport):
         return False
 
     return True
-
-if __name__ == '__main__':
-
-    print(
-        check_passport('2004-05-27', '2018-05-28')
-    )
